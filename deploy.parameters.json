@@ -3,7 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "webAppName": {
-            "value": "MyMvcApp-CRUD"
+            "value": "mymvcapp-crud-2025"
+        },
+        "location": {
+            "value": "eastus"
         },
         "sku": {
             "value": "F1"

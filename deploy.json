@@ -1,10 +1,10 @@
+
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "webAppName": {
             "type": "string",
-            "defaultValue": "MyMvcApp",
             "metadata": {
                 "description": "Name of the Web App"
             }
@@ -25,37 +25,36 @@
         }
     },
     "variables": {
-        "appServicePlanName": "[concat(parameters('webAppName'), '-asp')]"
+        "hostingPlanName": "[concat(parameters('webAppName'), '-plan')]"
     },
     "resources": [
         {
+            "apiVersion": "2022-09-01",
+            "name": "[variables('hostingPlanName')]",
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2021-02-01",
-            "name": "[variables('appServicePlanName')]",
             "location": "[parameters('location')]",
             "sku": {
-                "name": "[parameters('sku')]"
+                "name": "[parameters('sku')]",
+                "capacity": 1
             },
-            "kind": "app"
+            "properties": {
+                "name": "[variables('hostingPlanName')]"
+            }
         },
         {
-            "type": "Microsoft.Web/sites",
-            "apiVersion": "2021-02-01",
+            "apiVersion": "2022-09-01",
             "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/sites",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ],
             "properties": {
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "httpsOnly": true,
                 "siteConfig": {
                     "netFrameworkVersion": "v8.0",
-                    "metadata": [
-                        {
-                            "name": "CURRENT_STACK",
-                            "value": "dotnet"
-                        }
-                    ]
+                    "alwaysOn": false
                 }
             }
         }
@@ -63,7 +62,7 @@
     "outputs": {
         "webAppUrl": {
             "type": "string",
-            "value": "[concat('https://', reference(parameters('webAppName')).defaultHostName)]"
+            "value": "[reference(parameters('webAppName')).defaultHostName]"
         }
     }
 }
